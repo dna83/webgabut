@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Image Animation — Demo</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#0b1220;
+      --accent:#60a5fa;
+      --glass: rgba(255,255,255,0.06);
+    }
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, Arial;background:linear-gradient(180deg,var(--bg) 0%, #061126 100%);color:#e6eef8}
+    .wrap{max-width:1100px;margin:24px auto;padding:20px;display:grid;grid-template-columns:1fr 360px;gap:20px}
+
+    /* preview area */
+    .stage{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));border-radius:12px;padding:18px;box-shadow:0 6px 30px rgba(2,6,23,0.6);position:relative;overflow:hidden}
+    .stage-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .title{font-weight:600}
+    .sub{font-size:13px;color:#9fb3d6}
+
+    /* canvas / image area */
+    .viewport{height:560px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.08));position:relative;overflow:hidden}
+
+    /* parallax layers */
+    .layer{position:absolute;inset:0;pointer-events:none}
+    .sky{background:radial-gradient(circle at 20% 20%, rgba(255,255,255,0.03), transparent 8%), linear-gradient(180deg,#08203333, transparent 40%);filter:blur(6px);opacity:0.9}
+    .ground{position:absolute;bottom:0;height:160px;width:200%;left:-20%;background:linear-gradient(180deg,#052033,#021426);transform:skewY(-6deg) translateY(40%);opacity:0.7}
+
+    /* the animated image (SVG) */
+    .image-wrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:220px;height:220px;cursor:grab;touch-action:none}
+    .image-wrap.dragging{cursor:grabbing}
+    .rocket{width:100%;height:100%;display:block;transform-origin:50% 50%}
+
+    /* animation classes */
+    .anim-spin{animation:spin var(--speed,6s) linear infinite}
+    .anim-bounce{animation:bounce var(--speed,2s) ease-in-out infinite}
+    .anim-float{animation:float var(--speed,4s) ease-in-out infinite}
+
+    @keyframes spin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+    @keyframes bounce{0%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-55px)}100%{transform:translate(-50%,-50%) translateY(0)}}
+    @keyframes float{0%{transform:translate(-50%,-50%) translateY(-6px) rotate(-3deg)}50%{transform:translate(-50%,-50%) translateY(10px) rotate(3deg)}100%{transform:translate(-50%,-50%) translateY(-6px) rotate(-3deg)}}
+
+    /* control panel */
+    .panel{background:var(--card);padding:18px;border-radius:12px;height:100%;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
+    .controls{display:flex;flex-direction:column;gap:12px}
+    label{font-size:13px;color:#cfe6ff}
+    select,input[type=range],button{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:var(--glass);color:inherit}
+    .row{display:flex;gap:8px}
+    .row > *{flex:1}
+    .small{font-size:13px;color:#9fb3d6}
+
+    .btn{display:inline-flex;align-items:center;gap:8px;justify-content:center}
+    .credits{font-size:12px;color:#8fb0d8;margin-top:12px}
+
+    /* responsive */
+    @media(max-width:980px){.wrap{grid-template-columns:1fr;}.viewport{height:420px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage">
+      <div class="stage-header">
+        <div>
+          <div class="title">Interactive Image Animation</div>
+          <div class="sub">Klik, seret, dan ubah kontrol untuk bereksperimen ✨</div>
+        </div>
+        <div class="sub">Made with HTML/CSS/JS</div>
+      </div>
+
+      <div class="viewport" id="viewport">
+        <div class="layer sky"></div>
+        <div class="layer ground"></div>
+
+        <!-- image: inline SVG rocket (so file tetap self-contained) -->
+        <div class="image-wrap" id="imageWrap" role="img" aria-label="Rocket illustration">
+          <svg class="rocket" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#7dd3fc"/></linearGradient>
+              <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#ffbe76"/><stop offset="1" stop-color="#ffd6a5"/></linearGradient>
+            </defs>
+            <g transform="translate(0,0)">
+              <ellipse cx="256" cy="420" rx="120" ry="26" fill="rgba(0,0,0,0.25)"/>
+              <path d="M370 86c0 0-56-38-114-38s-114 38-114 38C122 126 96 200 96 256s36 134 36 134 36-12 90-12 90 12 90 12 36-56 36-134-26-130-26-130z" fill="url(#g1)"/>
+              <path d="M256 120c24 18 44 48 44 80 0 62-44 112-44 112s-44-50-44-112c0-32 20-62 44-80z" fill="#062a3f" opacity="0.05"/>
+              <circle cx="220" cy="210" r="28" fill="#0ea5a4"/>
+              <path d="M208 316l-40 68a8 8 0 0 0 6.9 12h66.1a8 8 0 0 0 6.9-12l-40-68a8 8 0 0 0-13 0z" fill="url(#g2)"/>
+              <!-- flame -->
+              <g id="flame">
+                <path d="M246 360c6 28 24 56 24 56s-34-8-48-8-48 8-48 8 18-28 24-56 12-24 24-24 18 0 24 24z" fill="#ff7a18"/>
+                <circle cx="234" cy="396" r="8" fill="#ffd97d"/>
+              </g>
+            </g>
+          </svg>
+        </div>
+
+      </div>
+    </div>
+
+    <aside class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <strong>Controls</strong>
+        <span class="small">Interaktif • keyboard friendly</span>
+      </div>
+
+      <div class="controls">
+        <div>
+          <label for="animType">Tipe Animasi</label>
+          <select id="animType">
+            <option value="none">Tidak ada (manual)</option>
+            <option value="anim-spin">Putar (Spin)</option>
+            <option value="anim-bounce">Melompat (Bounce)</option>
+            <option value="anim-float">Melayang (Float)</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="speedRange">Kecepatan (slider)</label>
+          <input id="speedRange" type="range" min="0.25" max="6" step="0.05" value="1">
+          <div class="small" id="speedLabel">Kecepatan: 1×</div>
+        </div>
+
+        <div>
+          <label>Kontrol Animasi</label>
+          <div class="row">
+            <button id="playBtn" class="btn">▶ Play</button>
+            <button id="pauseBtn" class="btn">⏸ Pause</button>
+          </div>
+        </div>
+
+        <div>
+          <label>Opsi Interaksi</label>
+          <div class="row">
+            <button id="resetBtn" class="btn">Reset posisi</button>
+            <button id="toggleParallax" class="btn">Toggle Parallax</button>
+          </div>
+        </div>
+
+        <div>
+          <label>Mode Arah</label>
+          <div class="row">
+            <button id="leftBtn" class="btn">◀ Kiri</button>
+            <button id="centerBtn" class="btn">● Tengah</button>
+            <button id="rightBtn" class="btn">▶ Kanan</button>
+          </div>
+        </div>
+
+        <div class="credits">
+          Tips: Tekan P untuk Play / Space untuk Pause • Seret gambar untuk memindahkannya • Gunakan slider untuk mengubah kecepatan.
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // Elements
+    const imageWrap = document.getElementById('imageWrap');
+    const animType = document.getElementById('animType');
+    const speedRange = document.getElementById('speedRange');
+    const speedLabel = document.getElementById('speedLabel');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const toggleParallax = document.getElementById('toggleParallax');
+    const leftBtn = document.getElementById('leftBtn');
+    const centerBtn = document.getElementById('centerBtn');
+    const rightBtn = document.getElementById('rightBtn');
+    const viewport = document.getElementById('viewport');
+
+    let currentClass = '';
+    let isPlaying = true;
+    let parallaxEnabled = true;
+
+    // initialize
+    function applyAnimClass(cls){
+      imageWrap.classList.remove(currentClass);
+      currentClass = cls === 'none' ? '' : cls;
+      if(currentClass) imageWrap.classList.add(currentClass);
+    }
+
+    animType.addEventListener('change', e => applyAnimClass(e.target.value));
+
+    // speed control -> set CSS variable --speed
+    function updateSpeed(){
+      const val = parseFloat(speedRange.value);
+      imageWrap.style.setProperty('--speed', val + 's');
+      speedLabel.textContent = `Kecepatan: ${val}×`;
+    }
+    speedRange.addEventListener('input', updateSpeed);
+    updateSpeed();
+
+    // play / pause
+    function play(){
+      if(!isPlaying){
+        imageWrap.style.animationPlayState = 'running';
+        isPlaying = true;
+      }
+    }
+    function pause(){
+      if(isPlaying){
+        imageWrap.style.animationPlayState = 'paused';
+        isPlaying = false;
+      }
+    }
+    playBtn.addEventListener('click', play);
+    pauseBtn.addEventListener('click', pause);
+
+    // keyboard shortcuts
+    window.addEventListener('keydown', e=>{
+      if(e.key.toLowerCase() === 'p') play();
+      if(e.code === 'Space') { e.preventDefault(); pause(); }
+    })
+
+    // reset position
+    const startPos = {x: null, y: null};
+    function resetPosition(){
+      imageWrap.style.left = '50%';
+      imageWrap.style.top = '50%';
+      imageWrap.style.transform = 'translate(-50%,-50%)';
+    }
+    resetBtn.addEventListener('click', resetPosition);
+
+    // position presets
+    leftBtn.addEventListener('click', ()=>{ imageWrap.style.left = '25%'; imageWrap.style.top='55%'; });
+    rightBtn.addEventListener('click', ()=>{ imageWrap.style.left = '75%'; imageWrap.style.top='45%'; });
+    centerBtn.addEventListener('click', resetPosition);
+
+    // drag & drop (pointer events)
+    let dragging = false; let dragOffset = {x:0,y:0};
+    imageWrap.addEventListener('pointerdown', (e)=>{
+      dragging = true; imageWrap.setPointerCapture(e.pointerId); imageWrap.classList.add('dragging');
+      const rect = imageWrap.getBoundingClientRect();
+      dragOffset.x = e.clientX - rect.left; dragOffset.y = e.clientY - rect.top;
+    });
+    window.addEventListener('pointermove', (e)=>{
+      if(!dragging) return;
+      const parentRect = viewport.getBoundingClientRect();
+      let left = e.clientX - parentRect.left - dragOffset.x + (imageWrap.offsetWidth/2);
+      let top = e.clientY - parentRect.top - dragOffset.y + (imageWrap.offsetHeight/2);
+      // clamp
+      left = Math.max(40, Math.min(parentRect.width-40, left));
+      top = Math.max(40, Math.min(parentRect.height-40, top));
+      imageWrap.style.left = left + 'px';
+      imageWrap.style.top = top + 'px';
+      imageWrap.style.transform = 'translate(-50%,-50%)';
+    });
+    window.addEventListener('pointerup', (e)=>{ if(dragging){ dragging=false; imageWrap.releasePointerCapture(e.pointerId); imageWrap.classList.remove('dragging'); }});
+
+    // parallax
+    function onMove(e){
+      if(!parallaxEnabled) return;
+      const rect = viewport.getBoundingClientRect();
+      const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2;
+      const dx = (e.clientX - cx)/rect.width; const dy = (e.clientY - cy)/rect.height;
+      // small translate for parallax
+      const tx = dx * 20; const ty = dy * 20;
+      imageWrap.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
+    }
+    viewport.addEventListener('pointermove', onMove);
+
+    toggleParallax.addEventListener('click', ()=>{ parallaxEnabled = !parallaxEnabled; toggleParallax.textContent = parallaxEnabled ? 'Toggle Parallax' : 'Toggle Parallax (off)'; if(!parallaxEnabled) imageWrap.style.transform = 'translate(-50%,-50%)'; });
+
+    // init defaults
+    applyAnimClass('anim-float');
+    speedRange.value = 1;
+    updateSpeed();
+    resetPosition();
+
+    // accessibility: focusable controls
+    [playBtn,pauseBtn,resetBtn,toggleParallax,leftBtn,centerBtn,rightBtn].forEach(b=>b.setAttribute('tabindex', '0'));
+
+    // small responsive tweak: convert percentage to px when dragging starts
+    (function convertStartPos(){
+      const rect = viewport.getBoundingClientRect();
+      // preserve center
+    })();
+  </script>
+</body>
+</html>
