@@ -47,7 +47,7 @@
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
         <div>
           <h1>Nihhh WEB buat ELuhhhh</h1>
-          <p class="lead">Buat pesan manis untuk doi — klik <em>Kirim</em> lalu lihat animasinya!</p>
+          <p class="lead">Buat pesan manis untuk ridvan — klik <em>Kirim</em> liat animasinya!</p>
         </div>
         <svg class="sparkle" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden>
           <g fill="#ffd6e0">
@@ -78,10 +78,10 @@
 
     <div class="right">
       <label for="toName">Kepada (nama/do'i)</label>
-      <input id="toName" type="text" placeholder="contoh: Raka, Sayangku..." />
+      <input id="toName" type="text" placeholder="contoh: Ridvan, Sayangku..." />
 
       <label for="msg" style="margin-top:10px">Pesan manis</label>
-      <textarea id="msg" placeholder="Tulis sesuatu yang bikin dia tersipu..."></textarea>
+      <textarea id="msg" placeholder=" Sok Coba Tulis nihh disini..."></textarea>
 
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="btn" id="sendBtn">Kirim 💌</button>
@@ -92,12 +92,12 @@
         <label>Preview</label>
         <div class="note" id="preview">
           <div class="from">Dari: <strong id="fromName">Kamu</strong></div>
-          <div class="message" id="previewMsg">Pesan akan muncul di sini setelah kamu mengetik dan klik Kirim.</div>
+          <div class="message" id="previewMsg">Pesan nya muncul kalo elu mengetik terus klik Kirim.</div>
         </div>
       </div>
 
       <div style="margin-top:12px;display:flex;gap:8px;align-items:center;justify-content:space-between">
-        <small style="color:#a76a80">Tips: klik berulang untuk efek hati tambahan ✨</small>
+        <small style="color:#a76a80">Tips: klik terus kalo mau banyak efek hati</small>
         <div>
           <button class="btn ghost" id="saveBtn">Simpan (download)</button>
         </div>
@@ -119,7 +119,7 @@
 
     // sample messages for 'acak'
     const samples = [
-      'Kamu bikin aku lupa napas, ntap banget deh 😌💖',
+      'Ridva bikin aku lupa napas, ntap banget deh 😌💖',
       'Kalau kamu bintang, aku rela jadi langitnya. 🌌',
       'Hari ini, esok, selamanya, aku pilih kamu. ❤️',
       'Rindu? Iya. Kangen? Pastinya. Cintaku? Selamanya. 😘',
@@ -128,7 +128,7 @@
 
     function updatePreview(){
       const name = toName.value.trim() || 'Sayang';
-      const message = msg.value.trim() || 'Pesan manismu akan muncul di sini...';
+      const message = msg.value.trim() || 'Pesan buat ridvan akan muncul disini muach :*';
       previewMsg.textContent = message;
       fromName.textContent = 'Kamu';
     }
