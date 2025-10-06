@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bucin Cute — Kartu Interaktif</title>
+  <style>
+    :root{--bg:#fff0f6;--card:#fff;--accent:#ff6b9a;--rose:#ff9bb3;--text:#2b2430}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;background:linear-gradient(180deg,var(--bg), #fff);color:var(--text);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .card{width:980px;max-width:100%;border-radius:18px;padding:26px;background:linear-gradient(180deg, rgba(255,255,255,0.85), #fff);box-shadow:0 12px 40px rgba(236,66,118,0.12);display:grid;grid-template-columns:480px 1fr;gap:20px}
+    .left{position:relative;padding:18px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff0f3);overflow:hidden}
+    .right{padding:18px}
+    h1{margin:0;font-size:24px;color:var(--accent)}
+    p.lead{margin:6px 0 18px;color:#7a4b5a}
+
+    /* cute character */
+    .cute{width:100%;height:340px;display:flex;align-items:center;justify-content:center}
+    .heart{width:120px;height:120px;display:inline-block;filter:drop-shadow(0 10px 20px rgba(255,107,154,0.16))}
+    .sparkle{position:absolute;inset:auto 14px 14px auto;width:80px;opacity:0.9}
+
+    /* controls */
+    label{font-size:13px;color:#6b4350}
+    input[type=text]{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);font-size:16px}
+    textarea{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);min-height:120px}
+    .row{display:flex;gap:8px}
+    .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(255,107,154,0.14)}
+
+    /* floating hearts */
+    .floating{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none}
+    .floating i{position:absolute;font-size:20px;opacity:0.9;animation:floatUp 4s linear infinite}
+    @keyframes floatUp{0%{transform:translateY(0) scale(0.8);opacity:0.9}100%{transform:translateY(-420px) scale(1.2);opacity:0}}
+
+    /* pocket note preview */
+    .note{background:linear-gradient(180deg,#fffefc,#fff0f6);padding:14px;border-radius:12px;border:1px solid rgba(255,107,154,0.06);min-height:120px;display:flex;flex-direction:column;gap:8px}
+    .note .from{font-size:13px;color:#7a4b5a}
+    .note .message{flex:1;white-space:pre-wrap}
+
+    /* responsive */
+    @media(max-width:900px){.card{grid-template-columns:1fr;}.left{order:2}.right{order:1}}
+  </style>
+</head>
+<body>
+  <div class="card" role="application" aria-label="Bucin Cute interactive card">
+    <div class="left">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div>
+          <h1>Bucin Cute 💘</h1>
+          <p class="lead">Buat pesan manis untuk doi — klik <em>Kirim</em> lalu lihat animasinya!</p>
+        </div>
+        <svg class="sparkle" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <g fill="#ffd6e0">
+            <ellipse cx="10" cy="10" rx="6" ry="3" transform="rotate(30 10 10)"/>
+            <ellipse cx="48" cy="14" rx="8" ry="4" transform="rotate(-20 48 14)"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="cute" id="cuteArea">
+        <!-- big heart SVG animated -->
+        <svg class="heart" viewBox="0 0 64 64" id="bigHeart" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="cute heart">
+          <defs>
+            <linearGradient id="h1" x1="0" x2="1"><stop offset="0" stop-color="#ff9bb3"/><stop offset="1" stop-color="#ff6b9a"/></linearGradient>
+          </defs>
+          <g transform="translate(0,0)">
+            <path d="M32 54s-18-12-24-20C2 24 16 10 24 16c6 4 8 8 8 8s2-4 8-8c8-6 22 8 16 18-6 8-24 20-24 20z" fill="url(#h1)">
+              <animate attributeName="transform" values="scale(0.9);scale(1.05);scale(0.95);scale(1)" dur="1.6s" repeatCount="indefinite"/>
+            </path>
+            <circle cx="44" cy="22" r="3" fill="#fff" opacity="0.6"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="floating" id="floating"></div>
+
+    </div>
+
+    <div class="right">
+      <label for="toName">Kepada (nama/do'i)</label>
+      <input id="toName" type="text" placeholder="contoh: Raka, Sayangku..." />
+
+      <label for="msg" style="margin-top:10px">Pesan manis</label>
+      <textarea id="msg" placeholder="Tulis sesuatu yang bikin dia tersipu..."></textarea>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn" id="sendBtn">Kirim 💌</button>
+        <button class="btn ghost" id="surpriseBtn">Acak pesan</button>
+      </div>
+
+      <div style="margin-top:14px">
+        <label>Preview</label>
+        <div class="note" id="preview">
+          <div class="from">Dari: <strong id="fromName">Kamu</strong></div>
+          <div class="message" id="previewMsg">Pesan akan muncul di sini setelah kamu mengetik dan klik Kirim.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center;justify-content:space-between">
+        <small style="color:#a76a80">Tips: klik berulang untuk efek hati tambahan ✨</small>
+        <div>
+          <button class="btn ghost" id="saveBtn">Simpan (download)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Elements
+    const toName = document.getElementById('toName');
+    const msg = document.getElementById('msg');
+    const sendBtn = document.getElementById('sendBtn');
+    const surpriseBtn = document.getElementById('surpriseBtn');
+    const previewMsg = document.getElementById('previewMsg');
+    const fromName = document.getElementById('fromName');
+    const floating = document.getElementById('floating');
+    const bigHeart = document.getElementById('bigHeart');
+    const saveBtn = document.getElementById('saveBtn');
+
+    // sample messages for 'acak'
+    const samples = [
+      'Kamu bikin aku lupa napas, ntap banget deh 😌💖',
+      'Kalau kamu bintang, aku rela jadi langitnya. 🌌',
+      'Hari ini, esok, selamanya, aku pilih kamu. ❤️',
+      'Rindu? Iya. Kangen? Pastinya. Cintaku? Selamanya. 😘',
+      'Kamu itu seperti Wi-Fi—tanpamu sinyalku hilang. 📶💕'
+    ];
+
+    function updatePreview(){
+      const name = toName.value.trim() || 'Sayang';
+      const message = msg.value.trim() || 'Pesan manismu akan muncul di sini...';
+      previewMsg.textContent = message;
+      fromName.textContent = 'Kamu';
+    }
+    toName.addEventListener('input', updatePreview);
+    msg.addEventListener('input', updatePreview);
+    updatePreview();
+
+    // floating hearts generator
+    function spawnHeart(xPercent){
+      const i = document.createElement('i');
+      const size = Math.random()*18 + 14;
+      i.style.left = (xPercent || Math.random()*100) + '%';
+      i.style.bottom = '-10px';
+      i.style.fontSize = size + 'px';
+      i.style.opacity = 0.9;
+      i.textContent = '💖';
+      // random delay and duration
+      const delay = Math.random()*0.5;
+      const dur = 3 + Math.random()*2;
+      i.style.animationDelay = delay + 's';
+      i.style.animationDuration = dur + 's';
+      floating.appendChild(i);
+      // remove after animation
+      setTimeout(()=>{ i.remove(); }, (delay+dur)*1000 + 500);
+    }
+
+    // click to spawn hearts near the click
+    document.getElementById('cuteArea').addEventListener('click', (e)=>{
+      // compute percent across area
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = ((e.clientX - rect.left)/rect.width)*100;
+      for(let k=0;k<6;k++) setTimeout(()=>spawnHeart(x + (Math.random()*10-5)), k*120);
+      // small pop scale
+      bigHeart.style.transform = 'scale(1.08)';
+      setTimeout(()=>bigHeart.style.transform = '', 300);
+    });
+
+    // send button behavior
+    sendBtn.addEventListener('click', ()=>{
+      const name = toName.value.trim() || 'Sayang';
+      const message = msg.value.trim() || samples[Math.floor(Math.random()*samples.length)];
+      previewMsg.textContent = message;
+      fromName.textContent = 'Kamu ❤️';
+      // spawn a bunch of hearts
+      for(let i=0;i<18;i++) setTimeout(()=>spawnHeart(Math.random()*100), i*80);
+      // gentle pulse on heart
+      bigHeart.querySelector('path').style.transition = 'transform 0.4s ease';
+      bigHeart.querySelector('path').style.transform = 'scale(1.12)';
+      setTimeout(()=>{ bigHeart.querySelector('path').style.transform=''; }, 420);
+    });
+
+    // surprise (acak pesan)
+    surpriseBtn.addEventListener('click', ()=>{
+      const s = samples[Math.floor(Math.random()*samples.length)];
+      msg.value = s;
+      updatePreview();
+    });
+
+    // save preview as text file
+    saveBtn.addEventListener('click', ()=>{
+      const name = toName.value.trim() || 'Sayang';
+      const message = msg.value.trim() || previewMsg.textContent;
+      const content = `Untuk: ${name}\n\n${message}\n\n- Dari: Kamu`;
+      const blob = new Blob([content], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `bucin_${name.replace(/\s+/g,'_').toLowerCase() || 'sayang'}.txt`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // small accessibility
+    sendBtn.addEventListener('keyup', (e)=>{ if(e.key === 'Enter') sendBtn.click(); });
+  </script>
+</body>
+</html>
